@@ -1,6 +1,9 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
 plugins {
     kotlin("jvm") version "1.7.10"
 
+    id("maven-publish")
     id("net.yakclient") version "1.0.1"
     kotlin("kapt") version "1.8.10"
 }
@@ -18,7 +21,6 @@ repositories {
 }
 
 dependencies {
-    add( "kapt", "net.yakclient:yakclient-preprocessor:1.0-SNAPSHOT")
     implementation("net.yakclient:client-api:1.0-SNAPSHOT")
     implementation("com.durganmcbroom:artifact-resolver:1.0-SNAPSHOT")
     implementation("com.durganmcbroom:artifact-resolver-simple-maven:1.0-SNAPSHOT")
@@ -26,9 +28,19 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.8.10")
 }
 
-
 tasks.named<JavaExec>("launch") {
-    jvmArgs("-XstartOnFirstThread", "-Xmx2G", "-XX:+UnlockExperimentalVMOptions", "-XX:+UseG1GC", "-XX:G1NewSizePercent=20", "-XX:G1ReservePercent=20", "-XX:MaxGCPauseMillis=50", "-XX:G1HeapRegionSize=32M")
+    if (Os.isFamily(Os.FAMILY_MAC)) {
+        jvmArgs(
+            "-XstartOnFirstThread",
+            "-Xmx2G",
+            "-XX:+UnlockExperimentalVMOptions",
+            "-XX:+UseG1GC",
+            "-XX:G1NewSizePercent=20",
+            "-XX:G1ReservePercent=20",
+            "-XX:MaxGCPauseMillis=50",
+            "-XX:G1HeapRegionSize=32M"
+        )
+    }
 }
 
 yakclient {
@@ -57,7 +69,7 @@ yakclient {
         create("all") {
             this.dependencies {
                 implementation(main)
-                implementation(tweakerPartition.sourceSet.output)
+                implementation(tweakerPartition.get().sourceSet.output)
                 implementation("net.yakclient:archives:1.1-SNAPSHOT")
                 minecraft("1.20.1")
                 add("kaptAll", "net.yakclient:yakclient-preprocessor:1.0-SNAPSHOT")
@@ -73,6 +85,39 @@ yakclient {
     }
 }
 
+publishing {
+    publications {
+        create<MavenPublication>("prod") {
+            artifact(tasks.jar)
+            artifact(tasks.generateErm) {
+                classifier = "erm"
+            }
+
+            groupId = "net.yakclient.extensions"
+            artifactId = "resource-tweaker"
+        }
+    }
+
+    repositories {
+        if (!project.hasProperty("maven-user") || !project.hasProperty("maven-pass")) return@repositories
+
+        maven {
+            val repo = if (project.findProperty("isSnapshot") == "true") "snapshots" else "releases"
+
+            isAllowInsecureProtocol = true
+
+            url = uri("http://maven.yakclient.net/$repo")
+
+            credentials {
+                username = project.findProperty("maven-user") as String
+                password = project.findProperty("maven-pass") as String
+            }
+            authentication {
+                create<BasicAuthentication>("basic")
+            }
+        }
+    }
+}
 
 
 java {
