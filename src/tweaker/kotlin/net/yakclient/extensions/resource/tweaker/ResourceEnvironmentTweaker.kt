@@ -12,8 +12,8 @@ class ResourceEnvironmentTweaker : EnvironmentTweaker {
             get() = internalExtensions.toList()
     }
 
-    override fun tweak(environment: ExtLoaderEnvironment): ExtLoaderEnvironment {
-        return environment.observeNodes { node ->
+    override fun tweak(environment: ExtLoaderEnvironment) {
+        environment.observeNodes { node ->
             node.archiveReference?.let(internalExtensions::add)
         }
     }
