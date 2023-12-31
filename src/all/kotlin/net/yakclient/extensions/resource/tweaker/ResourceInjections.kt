@@ -15,9 +15,6 @@ abstract class ResourceInjections {
 
     @SourceInjection(
         point = BEFORE_END,
-        from = "net.yakclient.extensions.resource.tweaker.ResourceInjections",
-        to = "net.minecraft.server.packs.resources.MultiPackResourceManager",
-        methodFrom = "pushPack()V",
         methodTo = "<init>(Lnet/minecraft/server/packs/PackType;Ljava/util/List;)V"
     )
     fun pushPack() {

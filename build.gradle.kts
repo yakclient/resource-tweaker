@@ -1,11 +1,14 @@
 import org.apache.tools.ant.taskdefs.condition.Os
 
 plugins {
-    kotlin("jvm") version "1.7.10"
+    kotlin("jvm") version "1.9.21"
 
     id("maven-publish")
-    id("net.yakclient") version "1.0.1"
-    kotlin("kapt") version "1.8.10"
+    id("net.yakclient") version "1.0.3"
+}
+
+tasks.wrapper {
+    gradleVersion = "8.6-rc-1"
 }
 
 group = "net.yakclient.extensions"
@@ -45,19 +48,19 @@ tasks.named<JavaExec>("launch") {
 
 yakclient {
     model {
-        groupId = "net.yakclient.extensions"
-        name = "resource-tweaker"
-        version = "1.0-SNAPSHOT"
+        groupId.set("net.yakclient.extensions")
+        name.set("resource-tweaker")
+        version.set("1.0-SNAPSHOT")
 
-        packagingType = "jar"
-        extensionClass = "net.yakclient.extensions.resource.tweaker.ResourceTweaker"
+        packagingType.set( "jar")
+        extensionClass.set("net.yakclient.extensions.resource.tweaker.ResourceTweaker")
     }
 
     tweakerPartition {
         entrypoint.set("net.yakclient.extensions.resource.tweaker.ResourceEnvironmentTweaker")
         this.dependencies {
             implementation("net.yakclient.components:ext-loader:1.0-SNAPSHOT")
-            implementation("net.yakclient:boot:1.0-SNAPSHOT")
+            implementation("net.yakclient:boot:1.1-SNAPSHOT")
             implementation("net.yakclient:archives:1.1-SNAPSHOT")
             implementation("com.durganmcbroom:jobs:1.0-SNAPSHOT")
             implementation("com.durganmcbroom:artifact-resolver-simple-maven:1.0-SNAPSHOT")
@@ -72,16 +75,16 @@ yakclient {
                 implementation(tweakerPartition.get().sourceSet.output)
                 implementation("net.yakclient:archives:1.1-SNAPSHOT")
                 minecraft("1.20.1")
-                add("kaptAll", "net.yakclient:yakclient-preprocessor:1.0-SNAPSHOT")
                 implementation("net.yakclient:boot:1.0-SNAPSHOT")
                 implementation("net.yakclient:common-util:1.0-SNAPSHOT")
                 implementation("org.jetbrains.kotlin:kotlin-stdlib:1.8.10")
                 implementation("net.yakclient:client-api:1.0-SNAPSHOT")
             }
 
+            mappingsType.set("mojang")
+
             supportedVersions.addAll(listOf("1.20.1", "1.19.2"))
         }
-
     }
 }
 
